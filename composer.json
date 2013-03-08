@@ -1,0 +1,10 @@
+{
+    "name": "ivan-novakov/php-authz-ws",
+    "description": "Authorization management REST WS",
+    
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.*",
+        "phly/phly-restfully": "dev-master"
+    }
+}
