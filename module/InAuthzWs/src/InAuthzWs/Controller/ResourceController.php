@@ -68,7 +68,7 @@ class ResourceController extends AbstractRestfulController
 
     public function onDispatch(MvcEvent $e)
     {
-        _dump($e->getRouteMatch());
+        //_dump($e->getRouteMatch());
         if (! $this->resourceHandler) {
             throw new Exception\MissingResourceHandlerException();
         }
@@ -95,7 +95,7 @@ class ResourceController extends AbstractRestfulController
 
     public function get($id)
     {
-        $resource = $this->resourceHandler->fetch($id);
+        $resource = $this->resourceHandler->fetch($id, $this->getEnvParams());
         if (! $resource) {
             return new ApiProblem(404, 'Resource not found');
         }
@@ -114,6 +114,7 @@ class ResourceController extends AbstractRestfulController
             ->getQuery('page', 1));
         $collection->setPageSize($this->collectionPageSize);
         $collection->setCollectionName($this->collectionName);
+        
         return $collection;
     }
 

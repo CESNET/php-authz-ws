@@ -28,5 +28,13 @@ return array(
                 )
             )
         )
+    ), 
+    
+    'db' => array(
+        'driver' => 'Pdo_Mysql', 
+        'host' => 'localhost', 
+        'dbname' => 'authz_ws', 
+        'username' => 'authzadmin', 
+        'password' => ''
     )
 );

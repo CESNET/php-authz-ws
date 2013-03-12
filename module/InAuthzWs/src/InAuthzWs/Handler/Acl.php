@@ -4,6 +4,7 @@ namespace InAuthzWs\Handler;
 
 use Zend\Paginator\Paginator;
 use Zend\Paginator\Adapter\ArrayAdapter;
+use Zend\Db\Adapter\Adapter;
 
 
 class Acl extends AbstractResourceHandler
@@ -24,26 +25,33 @@ class Acl extends AbstractResourceHandler
 
     public function fetch($id, array $params = array())
     {
-        return array(
-            'id' => 1, 
-            'name' => 'test'
-        );
+        $select = $this->getSelect('acl');
+        $select->where(array(
+            'id' => $id
+        ));
+        
+        $result = $this->executeSelect($select);
+        if (! $result->count()) {
+            return null;
+        }
+        
+        return ((array) $result->current());
     }
 
 
     public function fetchAll(array $params = array())
     {
-        _dump($params);
-        $data = array(
-            array(
-                'id' => 1, 
-                'name' => 'foo'
-            ), 
-            array(
-                'id' => 2, 
-                'name' => 'bar'
-            )
-        );
+        $select = $this->getSelect('acl');
+        $select->order('id ASC');
+        
+        $result = $this->executeSelect($select);
+        
+        $data = array();
+        foreach ($result as $row) {
+            $data[] = (array) $row;
+        }
+        
+        //_dump($data);
         
         return $data;
         /*

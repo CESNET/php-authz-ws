@@ -26,7 +26,9 @@ class ControllerConfig extends Config
                 
                 //$listener = new ResourceListener\Acl();
                 try {
-                    $handler = new Handler\Acl();
+                    //$handler = new Handler\Acl();
+                    $handler = $services->get('AuthzHandlerAcl');
+                    
                     /*
                     $listener = new Listener\ResourceListener($handler);
                     
@@ -34,7 +36,7 @@ class ControllerConfig extends Config
                     
                     $resource = new PhlyRestfully\Resource();
                     $resource->setEventManager($events);
-                    
+                    _dump($resource->getEventManager()->getIdentifiers());
                     $controller = new PhlyRestfully\ResourceController();
                     $controller->setResource($resource);
                     $controller->setRoute('authz-rest/acl');
@@ -49,6 +51,7 @@ class ControllerConfig extends Config
                         'DELETE'
                     ));
                     */
+                    
                     
                     $controller = new ResourceController();
                     $controller->setResourceHandler($handler);
