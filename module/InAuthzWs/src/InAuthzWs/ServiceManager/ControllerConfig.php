@@ -24,7 +24,6 @@ class ControllerConfig extends Config
                 $services = $controllers->getServiceLocator();
                 $events = $services->get('EventManager');
                 
-                //$listener = new ResourceListener\Acl();
                 try {
                     //$handler = new Handler\Acl();
                     $handler = $services->get('AuthzAclHandler');
@@ -52,11 +51,10 @@ class ControllerConfig extends Config
                     ));
                     */
                     
-                    
                     $controller = new ResourceController();
                     $controller->setResourceHandler($handler);
                     $controller->setRoute('authz-rest/acl');
-                    
+                    $controller->setLogger($services->get('AuthzLogger'));
                 } catch (\Exception $e) {
                     _dump("$e");
                     throw $e;

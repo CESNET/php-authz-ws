@@ -12,7 +12,7 @@ class ResourceDataValidationException extends \RuntimeException
     public function __construct(array $messages)
     {
         $this->validationMessages = $messages;
-        parent::__construct('Invalid resource data');
+        parent::__construct(sprintf("Invalid resource data: %s", implode(', ', array_keys($messages))));
     }
 
 

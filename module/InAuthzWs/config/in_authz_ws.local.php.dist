@@ -8,6 +8,20 @@ return array(
         'username' => 'authzadmin', 
         'password' => 'xxx'
     ),
+
+    'logger' => array(
+        'writers' => array(
+            'stream' => array(
+                'name' => 'stream', 
+                'options' => array(
+                    'stream' => 'var/log/php-authz-ws/authz.log'
+                ), 
+                'filters' => array(
+                    'priority' => \Zend\Log\Logger::DEBUG
+                )
+            )
+        )
+    ), 
     
     'acl_filter_definitions' => array(
         

@@ -133,16 +133,20 @@ class Acl extends AbstractResourceHandler
         //_dump($select->getSqlString());
         $result = $this->executeSqlQuery($select);
         
-        $data = array();
+        $items = array();
         foreach ($result as $row) {
             $resource = (array) $row;
-            $data[] = $resource;
+            $items[] = $resource;
         }
         
         //_dump($data);
         
 
-        return $data;
+        return array(
+            'items' => $items, 
+            'count' => count($items), 
+            'params' => $params
+        );
         /*
         $paginator = new Paginator(new ArrayAdapter($data));
         return $paginator;

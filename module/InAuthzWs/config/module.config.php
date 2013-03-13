@@ -38,6 +38,24 @@ return array(
         'password' => ''
     ), 
     
+    'logger' => array(
+        'writers' => array(
+            'stream' => array(
+                'name' => 'stream', 
+                'options' => array(
+                    'stream' => '/var/log/phpid-server.log'
+                ), 
+                'filters' => array(
+                    'priority' => \Zend\Log\Logger::DEBUG
+                ), 
+                'formatter' => array(
+                    'format' => '%timestamp% %priorityName% (%priority%): %message% %extra%', 
+                    'dateTimeFormat' => 'Y-m-d H:i:s'
+                )
+            )
+        )
+    ), 
+    
     'acl_filter_definitions' => array(
         
         'user_id' => array(
