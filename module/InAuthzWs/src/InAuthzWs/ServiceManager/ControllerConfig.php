@@ -27,7 +27,7 @@ class ControllerConfig extends Config
                 //$listener = new ResourceListener\Acl();
                 try {
                     //$handler = new Handler\Acl();
-                    $handler = $services->get('AuthzHandlerAcl');
+                    $handler = $services->get('AuthzAclHandler');
                     
                     /*
                     $listener = new Listener\ResourceListener($handler);

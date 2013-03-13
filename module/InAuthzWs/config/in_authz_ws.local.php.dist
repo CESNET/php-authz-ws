@@ -7,5 +7,19 @@ return array(
         'dbname' => 'authz_ws', 
         'username' => 'authzadmin', 
         'password' => 'xxx'
+    ),
+    
+    'acl_filter_definitions' => array(
+        
+        'resource_id' => array(
+            'validators' => array(
+                'regex' => array(
+                    'name' => 'regex', 
+                    'options' => array(
+                        'pattern' => '/^prefix:[\w\.]+:[\w]+:[\d]+$/'
+                    )
+                )
+            )
+        )
     )
 );

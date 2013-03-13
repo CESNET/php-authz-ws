@@ -8,6 +8,7 @@ use Zend\Mvc\MvcEvent;
 use PhlyRestfully\ApiProblem;
 use PhlyRestfully\HalResource;
 use PhlyRestfully\HalCollection;
+use InAuthzWs\Handler\Exception\ResourceDataValidationException;
 
 
 class ResourceController extends AbstractRestfulController
@@ -107,28 +108,71 @@ class ResourceController extends AbstractRestfulController
     public function getList()
     {
         $response = $this->getResponse();
-        $items = $this->resourceHandler->fetchAll($this->getEnvParams());
+        
+        try {
+            $items = $this->resourceHandler->fetchAll($this->getEnvParams());
+        } catch (ResourceDataValidationException $e) {
+            _dump($e->getValidationMessages());
+            return new ApiProblem(400, sprintf("Invalid query data: %s", implode(', ', array_keys($e->getValidationMessages()))));
+        } catch (\Exception $e) {
+            _dump("$e");
+            return new ApiProblem(500, 'Error retrieving collection');
+        }
         
         $collection = new HalCollection($items, $this->route, $this->route);
         $collection->setPage($this->getRequest()
             ->getQuery('page', 1));
         $collection->setPageSize($this->collectionPageSize);
         $collection->setCollectionName($this->collectionName);
+        $collection->setAttributes(array(
+            'count' => count($items)
+        ));
         
         return $collection;
     }
 
 
     public function create($data)
-    {}
+    {
+        try {
+            $resource = $this->resourceHandler->create($data, $this->getEnvParams());
+        } catch (ResourceDataValidationException $e) {
+            _dump($e->getValidationMessages());
+            return new ApiProblem(400, sprintf("Invalid resource data: %s", implode(', ', array_keys($e->getValidationMessages()))));
+        } catch (\Exception $e) {
+            _dump("$e");
+            return new ApiProblem(500, 'Error creating resource');
+        }
+        
+        if (! isset($resource['id'])) {
+            return new ApiProblem(422, 'No resource identifier present following resource creation.');
+        }
+        
+        $id = $resource['id'];
+        
+        $response = $this->getResponse();
+        $response->setStatusCode(201);
+        
+        return new HalResource($resource, $id, $this->route);
+    }
 
 
     public function update($id, $data)
-    {}
+    {
+        return new ApiProblem(501, 'Not implemented');
+    }
 
 
     public function delete($id)
-    {}
+    {
+        if (! $this->resourceHandler->delete($id, $this->getEnvParams())) {
+            return new ApiProblem(422, 'Unable to delete resource.');
+        }
+        
+        $response = $this->getResponse();
+        $response->setStatusCode(204);
+        return $response;
+    }
 
 
     public function getEnvParams()
