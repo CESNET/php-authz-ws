@@ -1,5 +1,5 @@
 <?php
-use InAuthzWs;
+
 return array(
     
     'router' => array(
@@ -60,7 +60,7 @@ return array(
     'client_storage' => array(
         'class' => 'InAuthzWs\Client\Registry\Storage\PhpArrayInFile', 
         'options' => array(
-            'file' => __DIR__ . '/../../../data/clients/storage.php'
+            'file' => '/data/clients/storage.php'
         )
     ), 
     

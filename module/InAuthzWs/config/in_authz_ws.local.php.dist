@@ -35,5 +35,12 @@ return array(
                 )
             )
         )
+    ),
+    
+    'client_storage' => array(
+        'class' => 'InAuthzWs\Client\Registry\Storage\PhpArrayInFile', 
+        'options' => array(
+            'file' => '/data/clients/storage.php'
+        )
     )
 );

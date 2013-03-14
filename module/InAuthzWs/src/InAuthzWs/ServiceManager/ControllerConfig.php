@@ -55,6 +55,7 @@ class ControllerConfig extends Config
                     $controller->setResourceHandler($handler);
                     $controller->setRoute('authz-rest/acl');
                     $controller->setLogger($services->get('AuthzLogger'));
+                    $controller->setClientAuthenticator($services->get('AuthzClientAuthenticator'));
                 } catch (\Exception $e) {
                     _dump("$e");
                     throw $e;

@@ -15,6 +15,8 @@ use Zend\Log\Logger;
 use Zend\Http\Request;
 use Zend\Mvc\Router\Http\RouteMatch;
 use Zend\Json\Json;
+use InAuthzWs\Client\Authenticator\AuthenticatorInterface;
+use InAuthzWs\Client\Authenticator\Result;
 
 
 class ResourceController extends AbstractRestfulController implements LoggerAwareInterface
@@ -67,6 +69,13 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     protected $logger = null;
 
     /**
+     * Client authenticator.
+     * 
+     * @var AuthenticatorInterface
+     */
+    protected $clientAuthenticator = null;
+
+    /**
      * Request signature.
      * 
      * @var string
@@ -80,24 +89,66 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     }
 
 
+    /**
+     * Sets the resource handler.
+     * 
+     * @param ResourceHandlerInterface $handler
+     */
     public function setResourceHandler(ResourceHandlerInterface $handler)
     {
         $this->resourceHandler = $handler;
     }
 
 
+    /**
+     * Returns the resource handler.
+     * 
+     * @return ResourceHandlerInterface
+     */
     public function getResourceHandler()
     {
         return $this->resourceHandler;
     }
 
 
+    /**
+     * Sets the client authentricator.
+     * 
+     * @param AuthenticatorInterface $clientAuthenticator
+     */
+    public function setClientAuthenticator(AuthenticatorInterface $clientAuthenticator)
+    {
+        $this->clientAuthenticator = $clientAuthenticator;
+    }
+
+
+    /**
+     * Returns the client authenticator.
+     * 
+     * @return AuthenticatorInterface|null
+     */
+    public function getClientAuthenticator()
+    {
+        return $this->clientAuthenticator;
+    }
+
+
+    /**
+     * Sets the request signature.
+     * 
+     * @param string $requestSingature
+     */
     public function setRequestSignature($requestSingature)
     {
         $this->requestSignature = $requestSingature;
     }
 
 
+    /**
+     * Returns the request signature.
+     * 
+     * @return string
+     */
     public function getRequestSignature()
     {
         if (! $this->requestSignature) {
@@ -122,6 +173,10 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     }
 
 
+    /**
+     * {@inheritdoc}
+     * @see \Zend\Mvc\Controller\AbstractRestfulController::onDispatch()
+     */
     public function onDispatch(MvcEvent $e)
     {
         $this->setRequestSignature($this->createRequestSignature($e->getRequest(), $e->getRouteMatch()));
@@ -134,7 +189,13 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
             throw new Exception\MissingRouteException();
         }
         
-        $return = parent::onDispatch($e);
+        $authenticationResult = $this->authenticateClient();
+        if (null === $authenticationResult || $authenticationResult->isValid()) {
+            $return = parent::onDispatch($e);
+        } else {
+            $this->log(sprintf("Unauthorized: [%s] %s", $authenticationResult->getCode(), implode('; ', $authenticationResult->getMessages())));
+            $return = $this->errorResponse(401, 'Authorization required: ' . $authenticationResult->getCode());
+        }
         
         $viewModel = $this->acceptableViewModelSelector($this->acceptCriteria);
         $viewModel->setVariables(array(
@@ -260,7 +321,24 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     }
 
 
-    protected function errorResponse($code, $message, \Exception $e = null)
+    /**
+     * Tries to authenticate the client if an authenticator is set. Otherwise returns null.
+     * 
+     * @return Result|null
+     */
+    protected function authenticateClient()
+    {
+        $result = null;
+        
+        if ($clientAuthenticator = $this->getClientAuthenticator()) {
+            $result = $clientAuthenticator->authenticate($this->getRequest());
+        }
+        
+        return $result;
+    }
+
+
+    protected function errorResponse($code, $message,\Exception $e = null)
     {
         $this->log(sprintf("Error [%s] %s", $code, $message), Logger::ERR);
         

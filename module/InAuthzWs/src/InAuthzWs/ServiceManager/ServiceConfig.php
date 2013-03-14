@@ -7,6 +7,9 @@ use Zend\ServiceManager\ServiceManager;
 use InAuthzWs\Handler;
 use Zend\InputFilter\Factory;
 use InAuthzWs\Handler\Filter\AclFilterFactory;
+use InAuthzWs\Client\Registry\Registry;
+use InAuthzWs\Client\Validator\Simple;
+use InAuthzWs\Client\Authenticator\Secret;
 
 
 class ServiceConfig extends Config
@@ -66,6 +69,58 @@ class ServiceConfig extends Config
                 }
                 
                 return $logger;
+            }, 
+            
+            /*
+             * Client registry storage
+             */
+            'AuthzClientStorage' => function (ServiceManager $serviceManager)
+            {
+                $config = $serviceManager->get('Config');
+                if (! isset($config['client_storage'])) {
+                    throw new Exception\MissingConfigException('client_storage');
+                }
+                
+                $storageConfig = $config['client_storage'];
+                if (! isset($storageConfig['class'])) {
+                    throw new Exception\MissingConfigException('client_storage/class');
+                }
+                $storageClass = $storageConfig['class'];
+                if (!\class_exists($storageClass)) {
+                    throw new Exception\ClassNotFoundException($storageClass);
+                }
+                
+                $storageOptions = array();
+                if (isset($storageConfig['options'])) {
+                    $storageOptions = $storageConfig['options'];
+                }
+                
+                $storage = new $storageClass($storageOptions);
+                
+                return $storage;
+            }, 
+            
+            /*
+             * Client registry
+             */
+            'AuthzClientRegistry' => function (ServiceManager $serviceManager)
+            {
+                $registry = new Registry($serviceManager->get('AuthzClientStorage'));
+                
+                return $registry;
+            }, 
+            
+            'AuthzClientValidator' => function (ServiceManager $serviceManager)
+            {
+                return new Simple();
+            }, 
+            
+            /*
+             * Client authenticator
+             */
+            'AuthzClientAuthenticator' => function (ServiceManager $serviceManager)
+            {
+                return new Secret($serviceManager->get('AuthzClientRegistry'), $serviceManager->get('AuthzClientValidator'));
             },
             
             /*
