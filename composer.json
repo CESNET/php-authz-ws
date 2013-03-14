@@ -5,6 +5,7 @@
     "require": {
         "php": ">=5.3.3",
         "zendframework/zendframework": "2.*",
-        "phly/phly-restfully": "dev-master"
+        "phly/phly-restfully": "dev-master",
+        "ivan-novakov/php-in-general": "dev-master"
     }
 }

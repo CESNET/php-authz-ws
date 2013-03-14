@@ -1,4 +1,5 @@
 <?php
+use InAuthzWs;
 return array(
     
     'router' => array(
@@ -53,6 +54,13 @@ return array(
                     'dateTimeFormat' => 'Y-m-d H:i:s'
                 )
             )
+        )
+    ), 
+    
+    'client_storage' => array(
+        'class' => 'InAuthzWs\Client\Registry\Storage\PhpArrayInFile', 
+        'options' => array(
+            'file' => __DIR__ . '/../../../data/clients/storage.php'
         )
     ), 
     

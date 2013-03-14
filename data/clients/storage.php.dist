@@ -1,0 +1,15 @@
+<?php
+return array(
+    
+    array(
+        'id' => 'test_client', 
+        'description' => 'Client for development testing', 
+        'authentication' => array(
+            'type' => 'secret', 
+            'options' => array(
+                'secret' => '12345'
+            )
+        )
+    )
+)
+;
