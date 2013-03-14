@@ -49,7 +49,7 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
         $info = array(
             'id' => 'testclient', 
             'description' => 'testdescription', 
-            'authenticationInfo' => array(
+            'authentication' => array(
                 'foo' => 'bar'
             )
         );
@@ -69,7 +69,7 @@ class ClientFactoryTest extends \PHPUnit_Framework_TestCase
         $info = array(
             'id' => 'testclient', 
             'description' => 'testdescription', 
-            'authenticationInfo' => $authInfo
+            'authentication' => $authInfo
         );
         
         $client = $this->factory->createClient($info);

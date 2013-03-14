@@ -23,8 +23,8 @@ class ClientFactory implements ClientFactoryInterface
             $client->setDescription($clientInfo['description']);
         }
         
-        if (isset($clientInfo['authenticationInfo'])) {
-            $authData = $clientInfo['authenticationInfo'];
+        if (isset($clientInfo['authentication'])) {
+            $authData = $clientInfo['authentication'];
             $type = null;
             if (! isset($authData['type'])) {
                 throw new Exception\ClientCreateException('Authentication info with no type information');
