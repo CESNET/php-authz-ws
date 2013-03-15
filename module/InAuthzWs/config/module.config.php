@@ -25,7 +25,35 @@ return array(
                                 'controller' => 'AclController'
                             )
                         )
-                    )
+                    ),
+                    
+                    'role' => array(
+                        'type' => 'Segment',
+                        'may_terminate' => true,
+                        'options' => array(
+                            'route' => '/role[/:id]',
+                            'constraints' => array(
+                                'id' => '[\w-]+'
+                            ),
+                            'defaults' => array(
+                                'controller' => 'RoleController'
+                            )
+                        )
+                    ),
+                    
+                    'permission' => array(
+                        'type' => 'Segment',
+                        'may_terminate' => true,
+                        'options' => array(
+                            'route' => '/permission[/:id]',
+                            'constraints' => array(
+                                'id' => '[\w-]+'
+                            ),
+                            'defaults' => array(
+                                'controller' => 'PermissionController'
+                            )
+                        )
+                    ),
                 )
             )
         )

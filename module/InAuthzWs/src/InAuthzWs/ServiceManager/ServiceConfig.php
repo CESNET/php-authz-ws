@@ -145,6 +145,27 @@ class ServiceConfig extends Config
                 $handler = new Handler\Acl($serviceManager->get('AuthzDbAdapter'));
                 $handler->setFilterFactory($serviceManager->get('AuthzAclFilterFactory'));
                 return $handler;
+            }, 
+            
+            /*
+             * Role resource handler
+             */
+            'AuthzRoleHandler' => function (ServiceManager $serviceManager)
+            {
+                $handler = new Handler\Role($serviceManager->get('AuthzDbAdapter'));
+                $handler->setPermissionHandler($serviceManager->get('AuthzPermissionHandler'));
+                
+                return $handler;
+            },
+            
+            /*
+             * Permission resource handler
+             */
+            'AuthzPermissionHandler' => function (ServiceManager $serviceManager)
+            {
+                $handler = new Handler\Permission($serviceManager->get('AuthzDbAdapter'));
+                
+                return $handler;
             }
         );
     }

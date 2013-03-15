@@ -21,12 +21,12 @@ class ControllerConfig extends Config
             
             'AclController' => function ($controllers)
             {
-                $services = $controllers->getServiceLocator();
-                $events = $services->get('EventManager');
+                $serviceManager = $controllers->getServiceLocator();
+                $events = $serviceManager->get('EventManager');
                 
                 try {
                     //$handler = new Handler\Acl();
-                    $handler = $services->get('AuthzAclHandler');
+                    $handler = $serviceManager->get('AuthzAclHandler');
                     
                     /*
                     $listener = new Listener\ResourceListener($handler);
@@ -54,12 +54,41 @@ class ControllerConfig extends Config
                     $controller = new ResourceController();
                     $controller->setResourceHandler($handler);
                     $controller->setRoute('authz-rest/acl');
-                    $controller->setLogger($services->get('AuthzLogger'));
-                    $controller->setClientAuthenticator($services->get('AuthzClientAuthenticator'));
+                    $controller->setCollectionName('acls');
+                    $controller->setLogger($serviceManager->get('AuthzLogger'));
+                    $controller->setClientAuthenticator($serviceManager->get('AuthzClientAuthenticator'));
                 } catch (\Exception $e) {
                     _dump("$e");
                     throw $e;
                 }
+                
+                return $controller;
+            }, 
+            
+            'RoleController' => function ($controllers)
+            {
+                $serviceManager = $controllers->getServiceLocator();
+                
+                $controller = new ResourceController();
+                $controller->setResourceHandler($serviceManager->get('AuthzRoleHandler'));
+                $controller->setRoute('authz-rest/role');
+                $controller->setCollectionName('roles');
+                $controller->setLogger($serviceManager->get('AuthzLogger'));
+                $controller->setClientAuthenticator($serviceManager->get('AuthzClientAuthenticator'));
+                
+                return $controller;
+            },
+            
+            'PermissionController' => function ($controllers)
+            {
+                $serviceManager = $controllers->getServiceLocator();
+                
+                $controller = new ResourceController();
+                $controller->setResourceHandler($serviceManager->get('AuthzPermissionHandler'));
+                $controller->setRoute('authz-rest/permission');
+                $controller->setCollectionName('permissions');
+                $controller->setLogger($serviceManager->get('AuthzLogger'));
+                $controller->setClientAuthenticator($serviceManager->get('AuthzClientAuthenticator'));
                 
                 return $controller;
             }

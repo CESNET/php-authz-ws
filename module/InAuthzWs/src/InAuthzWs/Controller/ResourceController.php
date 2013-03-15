@@ -19,6 +19,9 @@ use InAuthzWs\Client\Authenticator\AuthenticatorInterface;
 use InAuthzWs\Client\Authenticator\Result;
 
 
+/**
+ * Resource controller
+ */
 class ResourceController extends AbstractRestfulController implements LoggerAwareInterface
 {
 
@@ -174,6 +177,17 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
 
 
     /**
+     * Sets the collection name for this resource.
+     * 
+     * @param string $collectionName
+     */
+    public function setCollectionName($collectionName)
+    {
+        $this->collectionName = $collectionName;
+    }
+
+
+    /**
      * {@inheritdoc}
      * @see \Zend\Mvc\Controller\AbstractRestfulController::onDispatch()
      */
@@ -191,7 +205,11 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
         
         $authenticationResult = $this->authenticateClient();
         if (null === $authenticationResult || $authenticationResult->isValid()) {
-            $return = parent::onDispatch($e);
+            try {
+                $return = parent::onDispatch($e);
+            } catch (\Exception $exc) {
+                $return = $this->errorResponse(500, 'Internal error', $exc);
+            }
         } else {
             $this->log(sprintf("Unauthorized: [%s] %s", $authenticationResult->getCode(), implode('; ', $authenticationResult->getMessages())));
             $return = $this->errorResponse(401, 'Authorization required: ' . $authenticationResult->getCode());
@@ -242,18 +260,26 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
             return $this->errorResponse(500, 'Error retrieving collection', $e);
         }
         
+        if (! $data) {
+            // return new ApiProblem(501, 'Not Implemented');
+        }
+        
         $items = $data['items'];
         $collection = new HalCollection($items, $this->route, $this->route);
         $collection->setPage($this->getRequest()
             ->getQuery('page', 1));
         $collection->setPageSize($this->collectionPageSize);
         $collection->setCollectionName($this->collectionName);
-        $collection->setAttributes(array(
-            'count' => $data['count'], 
-            'params' => $data['params']
-        ));
         
-        $this->log(sprintf("Found %d item(s): %s", $data['count'], Json::encode($data['params'])));
+        $attributes = array(
+            'count' => $data['count']
+        );
+        if (isset($data['params'])) {
+            $attributes['params'] = $data['params'];
+        }
+        $collection->setAttributes($attributes);
+        
+        $this->log(sprintf("Found %d item(s): %s", $data['count'], isset($data['params']) ? Json::encode($data['params']) : ''));
         
         return $collection;
     }

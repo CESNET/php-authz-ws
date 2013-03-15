@@ -6,6 +6,7 @@ use Zend\Paginator\Paginator;
 use Zend\Paginator\Adapter\ArrayAdapter;
 use Zend\Db\Adapter\Adapter;
 use Zend\InputFilter\Factory;
+use PhlyRestfully\HalResource;
 
 
 class Acl extends AbstractResourceHandler
@@ -75,16 +76,33 @@ class Acl extends AbstractResourceHandler
     {
         $select = $this->getSql()
             ->select($this->dbTable);
-        $select->where(array(
-            'id' => $id
-        ));
         
+        $select->join(array(
+            'r' => 'role'
+        ), $this->prefixDbName('role_id') . '= r.id');
+        
+        $select->where(array(
+            $this->prefixDbName('id') => $id
+        ));
+
         $result = $this->executeSqlQuery($select);
         if (! $result->count()) {
             return null;
         }
         
-        return ((array) $result->current());
+        $row = ((array) $result->current());
+
+        return array(
+            'id' => $row['id'], 
+            'user_id' => $row['user_id'], 
+            'resource_id' => $row['resource_id'], 
+            'role_id' => $row['role_id'], 
+            'role' => new HalResource(array(
+                'id' => $row['role_id'], 
+                'code' => $row['code'], 
+                'description' => $row['description']
+            ), $row['role_id'], 'authz-rest/role')
+        );
     }
 
 
