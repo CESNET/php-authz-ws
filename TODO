@@ -1,0 +1,1 @@
+- Move input validation from the handler to the resource controller.
