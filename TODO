@@ -1,1 +1,2 @@
+- add client identification (IP address and ID) to log
 - Move input validation from the handler to the resource controller.
