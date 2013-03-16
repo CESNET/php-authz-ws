@@ -29,7 +29,7 @@ class Acl extends AbstractResourceHandler
         
         $result = $this->executeSqlQuery($insert);
         $id = $result->getGeneratedValue();
-        
+_dump($result);        
         return $this->fetch($id);
     }
 
@@ -79,7 +79,11 @@ class Acl extends AbstractResourceHandler
         
         $select->join(array(
             'r' => 'role'
-        ), $this->prefixDbName('role_id') . '= r.id');
+        ), $this->prefixDbName('role_id') . '= r.id', array(
+            'role_id' => 'id',
+            'role_code' => 'code',
+            'role_description' => 'description'
+        ));
         
         $select->where(array(
             $this->prefixDbName('id') => $id
@@ -99,8 +103,8 @@ class Acl extends AbstractResourceHandler
             'role_id' => $row['role_id'], 
             'role' => new HalResource(array(
                 'id' => $row['role_id'], 
-                'code' => $row['code'], 
-                'description' => $row['description']
+                'code' => $row['role_code'], 
+                'description' => $row['role_description']
             ), $row['role_id'], 'authz-rest/role')
         );
     }
