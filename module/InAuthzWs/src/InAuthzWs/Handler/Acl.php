@@ -29,7 +29,7 @@ class Acl extends AbstractResourceHandler
         
         $result = $this->executeSqlQuery($insert);
         $id = $result->getGeneratedValue();
-_dump($result);        
+
         return $this->fetch($id);
     }
 
