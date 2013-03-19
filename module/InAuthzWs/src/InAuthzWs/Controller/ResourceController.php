@@ -17,6 +17,7 @@ use Zend\Mvc\Router\Http\RouteMatch;
 use Zend\Json\Json;
 use InAuthzWs\Client\Authenticator\AuthenticatorInterface;
 use InAuthzWs\Client\Authenticator\Result;
+use InAuthzWs\Client\Client;
 
 
 /**
@@ -84,6 +85,12 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
      * @var string
      */
     protected $requestSignature = '';
+
+    /**
+     * Client.
+     * @var Client
+     */
+    protected $client = null;
 
 
     public function setLogger(LoggerInterface $logger)
@@ -205,6 +212,9 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
         
         $authenticationResult = $this->authenticateClient();
         if (null === $authenticationResult || $authenticationResult->isValid()) {
+            if ($authenticationResult) {
+                $this->client = $authenticationResult->getClient();
+            }
             try {
                 $return = parent::onDispatch($e);
             } catch (\Exception $exc) {
@@ -393,7 +403,11 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     protected function log($message, $priority = Logger::INFO)
     {
         if ($this->logger instanceof Logger) {
-            $message = sprintf("[%s] %s", $this->getRequestSignature(), $message);
+            $clientId = 'unknown';
+            if ($this->client) {
+                $clientId = $this->client->getId();
+            }
+            $message = sprintf("%s/%s [%s] %s", $clientId, $_SERVER['REMOTE_ADDR'], $this->getRequestSignature(), $message);
             $this->logger->log($priority, $message);
         }
     }
