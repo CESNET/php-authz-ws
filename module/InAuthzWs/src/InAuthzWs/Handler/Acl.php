@@ -2,11 +2,11 @@
 
 namespace InAuthzWs\Handler;
 
-use Zend\Paginator\Paginator;
 use Zend\Paginator\Adapter\ArrayAdapter;
 use Zend\Db\Adapter\Adapter;
 use Zend\InputFilter\Factory;
 use PhlyRestfully\HalResource;
+use Zend\Db\Sql\Where;
 
 
 class Acl extends AbstractResourceHandler
@@ -136,9 +136,10 @@ class Acl extends AbstractResourceHandler
         }
         
         if (isset($params['resource_id'])) {
-            $select->where(array(
-                'resource_id' => $params['resource_id']
-            ));
+            $resourceId = str_replace('*', '%', $params['resource_id']);
+            $select->where(function(Where $where) use ($resourceId) {
+                $where->like('resource_id', $resourceId);
+            });
         }
         
         if (isset($params['permission_id'])) {

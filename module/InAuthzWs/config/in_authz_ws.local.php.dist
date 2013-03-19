@@ -30,7 +30,8 @@ return array(
                 'regex' => array(
                     'name' => 'regex', 
                     'options' => array(
-                        'pattern' => '/^prefix:[\w\.]+:[\w]+:[\d]+$/'
+                        //'pattern' => '/^prefix:[\w\.]+:[\w]+:[\d]+$/',
+                        'pattern' => '/^shongo:([\w\.]+|\*):([\w]+|\*):([\d]+|\*)$/'
                     )
                 )
             )
