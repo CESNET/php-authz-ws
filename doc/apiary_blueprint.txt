@@ -1,0 +1,323 @@
+HOST: https://shongo-auth-dev.cesnet.cz/authz-ws/rest/
+
+--- Shongo AuthZ Service ---
+
+---
+Welcome to the our sample API documentation. All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
+
+Standards:
+
+* [HAL](http://tools.ietf.org/html/draft-kelly-json-hal-05)
+---
+
+--
+ACL resource
+
+Each item representing an ACL rule has the following fields:
+
+* `id`
+* `user_id` - the internal user ID for Shongo
+* `resource_id` - the full URN-formatted ID of the resource, the format is `<application>:<domain>:<type>:<numeric ID>`
+* `role_id` - the role ID (see the Role resource)
+--
+
+List ACL rules
+
+Providing one or more instances of the following query parameters will filter the result accordingly:
+
+* `user_id`
+* `resource_id` - the value may be complete URN or a URN with wildcards for some of the segments, for example - `shongo:*:req:*` - all requests from all domains.
+* `role_id` or `permission_id`
+GET /acl{?user_id*,resource_id*,role_id*,permission_id*}
+< 200
+< Content-Type: application/json
+{ 
+    "count": 2,
+    "params": {
+        "user_id": null,
+        "resource_id": null,
+        "role_id": null,
+        "permission_id": null
+    },
+    "_links": {
+        "self": {
+            "href": "https://example.org/acl"
+        }  
+    },
+    "_embedded": {
+        "acls": [{ 
+            "id": "2", 
+            "user_id": "testuser@example.org", 
+            "resource_id": "shongo:domain.org:req:123", 
+            "role_id": "5" 
+            "_links": {
+                "self": {
+                    "href": "https://example.org/acl/2",
+                }
+            }
+        },
+        { 
+            "id": "3", 
+            "user_id": "testuser@example.org", 
+            "resource_id": "shongo:domain.org:req:456", 
+            "role_id": "6" 
+            "_links": {
+                "self": {
+                    "href": "https://example.org/acl/3"
+                }
+            }
+        }]
+    }
+}
+
+Get a specific ACL rule by its ID.
+GET /acl/{id}
+< 200
+< Content-Type: application/json
+{ 
+    "id": "2", 
+    "user_id": "testuser@example.org", 
+    "resource_id": "shongo:domain.org:req:123", 
+    "role_id": "5" 
+    "_links": {
+        "self": {
+            "href": "https://example.org/acl/2"
+        }
+    },
+    "_embedded": {
+        "role": {
+            "id": "5",
+            "name": "rolename",
+            "description": "role description"
+        }
+    }
+}
+
+Create new ACL rule.
+
+Required parameteres:
+
+* `user_id` - format: email address (eduPersonPrincipalName)
+* `resource_id` - format: "`shongo:<domain>:<category>:<id>`"
+* `role_id` - must be the ID of an existing role
+POST /acl
+> Content-Type: application/json
+{ 
+    "user_id": "testuser@example.org", 
+    "resource_id": "shongo:domain.org:req:123", 
+    "role_id": "5" 
+}
+< 201
+< Content-Type: application/json
+< Location: https://example.org/acl/8
+{ 
+    "id": "8", 
+    "user_id": "testuser@example.org", 
+    "resource_id": "shongo:domain.org:req:123", 
+    "role_id": "5" 
+    "_links": {
+        "self": {
+            "href": "https://example.org/acl/8"
+        }
+    },
+    "_embedded": {
+        "role": {
+            "id": "5",
+            "name": "rolename",
+            "description": "role description"
+        }
+    }
+}
+
+Delete ACL rule.
+DELETE /acl/{id}
+< 204
+
+--
+Role resource
+
+Fields: 
+
+* `id` 
+* `code` - a unique string representing the role
+* `description`
+
+Many to Many relationship info:
+
+* http://lj.platformatyourservice.com/wiki/REST_API:composite_record_Resource
+* http://stackoverflow.com/questions/6324547/how-to-handle-many-to-many-relationships-in-a-restful-api
+--
+
+List all roles.
+GET /role
+< 200
+< Content-Type: application/json
+{ 
+    "_links": {
+        "self": {
+            "href": "/role"
+        }  
+    },
+    "_embedded": {
+        "roles": [{ 
+            "id": "2", 
+            "code": "owner", 
+            "description": "The owner of the resource" 
+        },    
+        { 
+            "id": "3", 
+            "code": "reuser", 
+            "description": "Can reuse the resource" 
+        }] 
+    }
+}
+
+Get a specific role.
+GET /role/{id}
+< 200
+< Content-Type: application/json
+{ 
+    "id": "2", 
+    "code": "owner", 
+    "description": "The owner of the resource" 
+    "_embedded": {
+        "permissions": [{
+            "id": "1",
+            "code": "read",
+            "description": "Read permission"
+        }]
+    },
+    "_links": {
+        "self": {
+            "href": "https://example.org/role/2"
+        }
+    }
+}
+
+Update a role.
+PUT /role/{id}
+> Content-Type: application/json
+{ 
+    "code": "owner", 
+    "description": "The owner of the resource" 
+    "_embedded": {
+        "permissions": [{
+            "id": "1"  
+        }]
+    }
+}
+< 200
+< Content-Type: application/json
+{ "status": "updated" }
+
+Add a new role.
+POST /role
+> Content-Type: application/json
+{ 
+    "code": "owner", 
+    "description": "The owner of the resource" 
+    "_embedded": {
+        "permissions": [{
+            "id": "1"  
+        }]
+    }
+}
+< 201
+< Content-Type: application/json
+{ "status" : "created", "url": "/role/2" }
+
+Delete a role.
+DELETE /role/{id}
+< 204
+
+
+--
+Permission resource
+
+Permissions are bound to roles.
+Fields:
+
+* `id`
+* `code` - a unique string representation of the permission
+* `description`
+--
+
+Get all permissions.
+
+It is possible to filter the output by:
+
+* role_id
+GET /permission{?role_id*}
+< 200
+< Content-Type: application/json
+{ 
+    "_links": {
+        "self": {
+            "href": "/permission
+        }  
+    },
+    "_embedded": {
+        "permissions": [{ 
+            "id": "1", 
+            "code": "read", 
+            "description": "Read permission",
+            "_links": {
+                "self": {
+                    "href": "/permission/1"
+                }
+            }
+        },
+        { 
+            "id": "2", 
+            "code": "write", 
+            "description": "Write permission",
+            "_links": {
+                "self": {
+                    "href": "/permission/2"
+                }
+            }     
+        }]
+    }
+}
+
+Get a specific permission.
+GET /permission/{id}
+< 200
+< Content-Type: application/json
+{ 
+    "id": "2", 
+    "code": "write", 
+    "description": "Write permission" 
+    "_links": {
+        "self": {
+            "href": "/permission/2"
+        }
+    }
+}
+
+Update a permission.
+PUT /permission/{id}
+> Content-Type: application/json
+{ 
+    "code": "read", 
+    "description": "Read permission" 
+}
+< 200
+< Content-Type: application/json
+{ "status": "updated" }
+
+Add a new permission.
+POST /permission
+> Content-Type: application/json
+{ 
+    "code": "ignore", 
+    "description": "Ignore permission" 
+}
+< 201
+< Content-Type: application/json
+{ "status" : "created", "url": "/permission/3" }
+
+Delete a permission.
+DELETE /permission/{id}
+< 204
+
