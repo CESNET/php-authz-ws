@@ -98,8 +98,8 @@ return array(
             'name' => 'user_id', 
             'required' => true, 
             'validators' => array(
-                'email' => array(
-                    'name' => 'email_address'
+                'digits' => array(
+                    'name' => 'digits'
                 )
             )
         ), 
