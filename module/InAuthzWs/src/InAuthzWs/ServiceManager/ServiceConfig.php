@@ -10,6 +10,8 @@ use InAuthzWs\Handler\Filter\AclFilterFactory;
 use InAuthzWs\Client\Registry\Registry;
 use InAuthzWs\Client\Validator\Simple;
 use InAuthzWs\Client\Authenticator\Secret;
+use InAuthzWs\Listener\ApiProblemListener;
+use InAuthzWs\Listener\DispatchErrorListener;
 
 
 class ServiceConfig extends Config
@@ -19,12 +21,32 @@ class ServiceConfig extends Config
     public function getFactories()
     {
         return array(
+            'InAuthzWs\ApiProblemListener' => function ($services)
+            {
+                $config = array();
+                if ($services->has('config')) {
+                    $config = $services->get('config');
+                }
+                
+                $filter = null;
+                if (isset($config['phlyrestfully']) && isset($config['phlyrestfully']['accept_filter'])) {
+                    $filter = $config['phlyrestfully']['accept_filter'];
+                }
+                
+                return new ApiProblemListener($filter);
+            }, 
+            
+            'InAuthzWs\DispatchErrorListener' => function (ServiceManager $serviceManager)
+            {
+                return new DispatchErrorListener($serviceManager->get('InAuthzWs\Logger'));
+            },
+            
             /*
              * DB adapter
              */
-            'AuthzDbAdapter' => 'Zend\Db\Adapter\AdapterServiceFactory', 
+            'InAuthzWs\DbAdapter' => 'Zend\Db\Adapter\AdapterServiceFactory', 
             
-            'AuthzLogger' => function (ServiceManager $serviceManager)
+            'InAuthzWs\Logger' => function (ServiceManager $serviceManager)
             {
                 $config = $serviceManager->get('Config');
                 $loggerConfig = $config['logger'];
@@ -74,7 +96,7 @@ class ServiceConfig extends Config
             /*
              * Client registry storage
              */
-            'AuthzClientStorage' => function (ServiceManager $serviceManager)
+            'InAuthzWs\ClientStorage' => function (ServiceManager $serviceManager)
             {
                 $config = $serviceManager->get('Config');
                 if (! isset($config['client_storage'])) {
@@ -86,7 +108,7 @@ class ServiceConfig extends Config
                     throw new Exception\MissingConfigException('client_storage/class');
                 }
                 $storageClass = $storageConfig['class'];
-                if (!\class_exists($storageClass)) {
+                if (! \class_exists($storageClass)) {
                     throw new Exception\ClassNotFoundException($storageClass);
                 }
                 
@@ -103,14 +125,14 @@ class ServiceConfig extends Config
             /*
              * Client registry
              */
-            'AuthzClientRegistry' => function (ServiceManager $serviceManager)
+            'InAuthzWs\ClientRegistry' => function (ServiceManager $serviceManager)
             {
-                $registry = new Registry($serviceManager->get('AuthzClientStorage'));
+                $registry = new Registry($serviceManager->get('InAuthzWs\ClientStorage'));
                 
                 return $registry;
             }, 
             
-            'AuthzClientValidator' => function (ServiceManager $serviceManager)
+            'InAuthzWs\ClientValidator' => function (ServiceManager $serviceManager)
             {
                 return new Simple();
             }, 
@@ -118,15 +140,15 @@ class ServiceConfig extends Config
             /*
              * Client authenticator
              */
-            'AuthzClientAuthenticator' => function (ServiceManager $serviceManager)
+            'InAuthzWs\ClientAuthenticator' => function (ServiceManager $serviceManager)
             {
-                return new Secret($serviceManager->get('AuthzClientRegistry'), $serviceManager->get('AuthzClientValidator'));
+                return new Secret($serviceManager->get('InAuthzWs\ClientRegistry'), $serviceManager->get('InAuthzWs\ClientValidator'));
             },
             
             /*
              * Filter factory for the ACL resource handler
              */
-            'AuthzAclFilterFactory' => function (ServiceManager $serviceManager)
+            'InAuthzWs\AclFilterFactory' => function (ServiceManager $serviceManager)
             {
                 $config = $serviceManager->get('Config');
                 if (! isset($config['acl_filter_definitions'])) {
@@ -139,21 +161,21 @@ class ServiceConfig extends Config
             /*
              * ACL resource handler
              */
-            'AuthzAclHandler' => function (ServiceManager $serviceManager)
+            'InAuthzWs\AclHandler' => function (ServiceManager $serviceManager)
             {
                 
-                $handler = new Handler\Acl($serviceManager->get('AuthzDbAdapter'));
-                $handler->setFilterFactory($serviceManager->get('AuthzAclFilterFactory'));
+                $handler = new Handler\Acl($serviceManager->get('InAuthzWs\DbAdapter'));
+                $handler->setFilterFactory($serviceManager->get('InAuthzWs\AclFilterFactory'));
                 return $handler;
             }, 
             
             /*
              * Role resource handler
              */
-            'AuthzRoleHandler' => function (ServiceManager $serviceManager)
+            'InAuthzWs\RoleHandler' => function (ServiceManager $serviceManager)
             {
-                $handler = new Handler\Role($serviceManager->get('AuthzDbAdapter'));
-                $handler->setPermissionHandler($serviceManager->get('AuthzPermissionHandler'));
+                $handler = new Handler\Role($serviceManager->get('InAuthzWs\DbAdapter'));
+                $handler->setPermissionHandler($serviceManager->get('InAuthzWs\PermissionHandler'));
                 
                 return $handler;
             },
@@ -161,9 +183,9 @@ class ServiceConfig extends Config
             /*
              * Permission resource handler
              */
-            'AuthzPermissionHandler' => function (ServiceManager $serviceManager)
+            'AInAuthzWs\PermissionHandler' => function (ServiceManager $serviceManager)
             {
-                $handler = new Handler\Permission($serviceManager->get('AuthzDbAdapter'));
+                $handler = new Handler\Permission($serviceManager->get('InAuthzWs\DbAdapter'));
                 
                 return $handler;
             }

@@ -374,7 +374,7 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
     }
 
 
-    protected function errorResponse($code, $message,\Exception $e = null)
+    protected function errorResponse($code, $message, \Exception $e = null)
     {
         $this->log(sprintf("Error [%s] %s", $code, $message), Logger::ERR);
         

@@ -22,7 +22,7 @@ return array(
                                 'id' => '[\w-]+'
                             ), 
                             'defaults' => array(
-                                'controller' => 'AclController'
+                                'controller' => 'InAuthzWs\AclController'
                             )
                         )
                     ),
@@ -36,7 +36,7 @@ return array(
                                 'id' => '[\w-]+'
                             ),
                             'defaults' => array(
-                                'controller' => 'RoleController'
+                                'controller' => 'InAuthzWs\RoleController'
                             )
                         )
                     ),
@@ -50,7 +50,7 @@ return array(
                                 'id' => '[\w-]+'
                             ),
                             'defaults' => array(
-                                'controller' => 'PermissionController'
+                                'controller' => 'InAuthzWs\PermissionController'
                             )
                         )
                     ),
