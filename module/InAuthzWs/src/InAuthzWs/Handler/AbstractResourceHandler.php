@@ -41,6 +41,17 @@ abstract class AbstractResourceHandler implements ResourceHandlerInterface
     public function __construct(Adapter $dbAdapter)
     {
         $this->dbAdapter = $dbAdapter;
+        /*
+         * Workaround
+         * https://github.com/zendframework/zf2/pull/4078
+         */
+        $driver = $this->dbAdapter->getDriver();
+        $driver->getConnection()
+            ->connect();
+        $this->dbAdapter->getPlatform()
+            ->setDriver($driver);
+        /* --- */
+        
         $this->sql = new Sql($this->dbAdapter);
     }
 
@@ -122,8 +133,9 @@ abstract class AbstractResourceHandler implements ResourceHandlerInterface
      */
     protected function executeSqlQuery(SqlInterface $sqlObject)
     {
+        $platform = null;
         $sqlString = $this->getSql()
-            ->getSqlStringForSqlObject($sqlObject);
+            ->getSqlStringForSqlObject($sqlObject, $platform);
         $result = $this->dbAdapter->query($sqlString, Adapter::QUERY_MODE_EXECUTE);
         
         return $result;
