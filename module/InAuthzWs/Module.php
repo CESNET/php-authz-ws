@@ -6,6 +6,7 @@ use Zend\ModuleManager\Feature\ControllerProviderInterface;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use InAuthzWs\ServiceManager\ServiceConfig;
 use InAuthzWs\ServiceManager\ControllerConfig;
+use Zend\Mvc\MvcEvent;
 
 
 class Module implements AutoloaderProviderInterface, ControllerProviderInterface
@@ -40,12 +41,22 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
     {
         return new ServiceConfig();
     }
-    
-    /*
+
+
     public function onBootstrap(MvcEvent $e)
     {
-        //_dump($e->getApplication()->getServiceManager()->get('Di')->get('dummy_auth_adapter'));
-        //_dump($e->getApplication()->getServiceManager()->get('dummy_auth_adapter'));
+        $events = $e->getApplication()
+            ->getEventManager();
+        
+        $sharedEvents = $events->getSharedManager();
+        $sharedEvents->attach('InAuthzWs\Controller\ResourceController', 'dispatch', function ($e)
+        {
+            $eventManager = $e->getApplication()
+                ->getEventManager();
+            $serviceManager = $e->getApplication()
+                ->getServiceManager();
+            $eventManager->attach($serviceManager->get('InAuthzWs\ApiProblemListener'));
+            $eventManager->attach($serviceManager->get('InAuthzWs\DispatchErrorListener'));
+        }, 300);
     }
-    */
 }
