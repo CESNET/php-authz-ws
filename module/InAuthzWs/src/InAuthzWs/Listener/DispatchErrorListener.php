@@ -74,7 +74,7 @@ class DispatchErrorListener implements ListenerAggregateInterface
             $this->logger->err(sprintf("Exception [%s]: %s", get_class($exception), $exception->getMessage()));
             $this->logger->debug($exception->getTraceAsString());
         } else {
-            $this->logger->err($model->getVariable('message'));
+            $this->logger->err($model->getVariable('message') . '[' . $_SERVER['REQUEST_URI'] . ']');
         }
     }
 }

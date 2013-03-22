@@ -49,14 +49,24 @@ class Module implements AutoloaderProviderInterface, ControllerProviderInterface
             ->getEventManager();
         
         $sharedEvents = $events->getSharedManager();
-        $sharedEvents->attach('InAuthzWs\Controller\ResourceController', 'dispatch', function ($e)
+        $sharedEvents->attach('InAuthzWs\Controller\ResourceController', 'dispatch', function (MvcEvent $mvcEvent)
         {
-            $eventManager = $e->getApplication()
+            $eventManager = $mvcEvent->getApplication()
                 ->getEventManager();
-            $serviceManager = $e->getApplication()
+            $serviceManager = $mvcEvent->getApplication()
                 ->getServiceManager();
             $eventManager->attach($serviceManager->get('InAuthzWs\ApiProblemListener'));
             $eventManager->attach($serviceManager->get('InAuthzWs\DispatchErrorListener'));
         }, 300);
+        
+        $events->attach('dispatch.error', function (MvcEvent $mvcEvent)
+        {
+            $eventManager = $mvcEvent->getApplication()
+                ->getEventManager();
+            $serviceManager = $mvcEvent->getApplication()
+                ->getServiceManager();
+            $eventManager->attach($serviceManager->get('InAuthzWs\ApiProblemListener'));
+            $eventManager->attach($serviceManager->get('InAuthzWs\DispatchErrorListener'));
+        });
     }
 }
