@@ -183,7 +183,7 @@ class ServiceConfig extends Config
             /*
              * Permission resource handler
              */
-            'AInAuthzWs\PermissionHandler' => function (ServiceManager $serviceManager)
+            'InAuthzWs\PermissionHandler' => function (ServiceManager $serviceManager)
             {
                 $handler = new Handler\Permission($serviceManager->get('InAuthzWs\DbAdapter'));
                 
