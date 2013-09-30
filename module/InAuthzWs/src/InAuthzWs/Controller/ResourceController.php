@@ -275,11 +275,13 @@ class ResourceController extends AbstractRestfulController implements LoggerAwar
         }
         
         $items = $data['items'];
-        $collection = new HalCollection($items, $this->route, $this->route);
+        $collection = new HalCollection($items);
         $collection->setPage($this->getRequest()
             ->getQuery('page', 1));
         $collection->setPageSize($this->collectionPageSize);
         $collection->setCollectionName($this->collectionName);
+        $collection->setCollectionRoute($this->route);
+        $collection->setResourceRoute($this->route);
         
         $attributes = array(
             'count' => $data['count']

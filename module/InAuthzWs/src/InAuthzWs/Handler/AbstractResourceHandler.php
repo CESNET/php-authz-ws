@@ -129,7 +129,7 @@ abstract class AbstractResourceHandler implements ResourceHandlerInterface
      * Executes a Sql object and returns the result.
      * 
      * @param SqlInterface $sqlObject
-     * @return \Zend\Db\Adapter\Driver\StatementInterface|\Zend\Db\ResultSet\Zend\Db\ResultSet|\Zend\Db\Adapter\Driver\ResultInterface|\Zend\Db\ResultSet\Zend\Db\ResultSetInterface>
+     * @return \Zend\Db\Adapter\Driver\StatementInterface|\Zend\Db\ResultSet\Zend\Db\ResultSet|\Zend\Db\Adapter\Driver\ResultInterface|\Zend\Db\ResultSet\Zend\Db\ResultSetInterface
      */
     protected function executeSqlQuery(SqlInterface $sqlObject)
     {
