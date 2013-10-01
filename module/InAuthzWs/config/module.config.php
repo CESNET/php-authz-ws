@@ -72,7 +72,7 @@ return array(
             'stream' => array(
                 'name' => 'stream', 
                 'options' => array(
-                    'stream' => '/var/log/phpid-server.log'
+                    'stream' => '/var/log/authz.log'
                 ), 
                 'filters' => array(
                     'priority' => \Zend\Log\Logger::DEBUG

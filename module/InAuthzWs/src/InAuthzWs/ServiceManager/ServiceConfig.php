@@ -12,6 +12,7 @@ use InAuthzWs\Client\Validator\Simple;
 use InAuthzWs\Client\Authenticator\Secret;
 use InAuthzWs\Listener\ApiProblemListener;
 use InAuthzWs\Listener\DispatchErrorListener;
+use InAuthzWs\Client\Authenticator\HttpBasic;
 
 
 class ServiceConfig extends Config
@@ -34,7 +35,7 @@ class ServiceConfig extends Config
                 }
                 
                 return new ApiProblemListener($filter);
-            }, 
+            },
             
             'InAuthzWs\DispatchErrorListener' => function (ServiceManager $serviceManager)
             {
@@ -44,7 +45,7 @@ class ServiceConfig extends Config
             /*
              * DB adapter
              */
-            'InAuthzWs\DbAdapter' => 'Zend\Db\Adapter\AdapterServiceFactory', 
+            'InAuthzWs\DbAdapter' => 'Zend\Db\Adapter\AdapterServiceFactory',
             
             'InAuthzWs\Logger' => function (ServiceManager $serviceManager)
             {
@@ -108,7 +109,7 @@ class ServiceConfig extends Config
                     throw new Exception\MissingConfigException('client_storage/class');
                 }
                 $storageClass = $storageConfig['class'];
-                if (! \class_exists($storageClass)) {
+                if (!\class_exists($storageClass)) {
                     throw new Exception\ClassNotFoundException($storageClass);
                 }
                 
@@ -130,11 +131,13 @@ class ServiceConfig extends Config
                 $registry = new Registry($serviceManager->get('InAuthzWs\ClientStorage'));
                 
                 return $registry;
-            }, 
+            },
             
             'InAuthzWs\ClientValidator' => function (ServiceManager $serviceManager)
             {
-                return new Simple();
+                $clientValidator = new Simple();
+                $clientValidator->setAuthenticationType('http_basic');
+                return $clientValidator;
             }, 
             
             /*
@@ -142,7 +145,15 @@ class ServiceConfig extends Config
              */
             'InAuthzWs\ClientAuthenticator' => function (ServiceManager $serviceManager)
             {
-                return new Secret($serviceManager->get('InAuthzWs\ClientRegistry'), $serviceManager->get('InAuthzWs\ClientValidator'));
+                $clientRegistry = $serviceManager->get('InAuthzWs\ClientRegistry');
+                $clientValidator = $serviceManager->get('InAuthzWs\ClientValidator');
+                
+                $clientAuthenticator = new HttpBasic($clientRegistry, $clientValidator);
+                return $clientAuthenticator;
+                /*
+                return new Secret($serviceManager->get('InAuthzWs\ClientRegistry'), 
+                    $serviceManager->get('InAuthzWs\ClientValidator'));
+                    */
             },
             
             /*
